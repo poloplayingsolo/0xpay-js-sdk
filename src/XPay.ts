@@ -86,23 +86,25 @@ export class XPay {
   }
 
   async withdrawCrypto(body: {
-    localId: string
+    localId?: string
     amount: string
     to: string
     ticker: string
     blockchain: Blockchain
-    meta: string
+    meta?: string
+    fee?: string
   }): Promise<string> {
     const response = await this.fetchWithAuthentication('/merchants/withdrawals', 'POST', body)
     return response.id
   }
 
   async withdrawFiat(body: {
-    localId: string
+    localId?: string
     amount: string
     to: string
     ticker: string
-    meta: string
+    meta?: string
+    fee?: string
   }): Promise<string> {
     const response = await this.fetchWithAuthentication(
       '/merchants/withdrawals/fiat/batch',
