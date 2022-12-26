@@ -59,7 +59,7 @@ export class XPay {
     const timestamp = Math.floor(Date.now() / 1000)
 
     const signature = this.generateSignature(
-      method + url.pathname + url.search + encodedBody + timestamp
+      method + url.pathname + url.search + (encodedBody ?? '') + timestamp
     )
 
     const resp = await fetch(url.toString(), {
