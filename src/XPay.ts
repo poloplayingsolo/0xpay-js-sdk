@@ -243,7 +243,7 @@ export class XPay {
     return this.fetchWithAuthentication('/merchants/assets/crypto', 'GET')
   }
 
-  validateIpn(
+  validateWebhookRequest(
     payload: { method: string; url: string; rawBody: string; timestamp: number | string; signature: string },
   ): { code: -1 | -2 | -3; description: string } | void {
     const { method, url, rawBody, signature } = payload

@@ -9,6 +9,7 @@
     "strict": true,
     "module": "esnext",
     "noEmitOnError": true,
+    "isolatedModules": true,
     "lib": ["es2017", "dom"],
     "esModuleInterop": false,
     "allowSyntheticDefaultImports": true
