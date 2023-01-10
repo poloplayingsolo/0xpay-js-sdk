@@ -1,3 +1,4 @@
+/** @category Withdraw With Exchange */
 export interface EstimatedExchangeWithdraw {
   withdraw: {
     ticker: string

@@ -4,7 +4,7 @@ export default {
   input: 'src/index.ts',
   output: {
     sourcemap: true,
-    dir: 'dist',
+    dir: 'lib',
     format: 'cjs',
   },
   external: ['node-fetch', 'crypto'],

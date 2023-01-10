@@ -2,6 +2,7 @@ import { Blockchain } from './Blockchain'
 import { IpnKind } from './IpnKind'
 import { IpnStatus } from './IpnStatus'
 
+/** @category Ipn */
 export interface IpnWithdrawExchangeCrypto {
   id: string
   kind: IpnKind.WITHDRAW_EXCHANGE_CRYPTO

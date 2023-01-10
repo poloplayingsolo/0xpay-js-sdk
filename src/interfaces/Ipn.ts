@@ -6,6 +6,7 @@ import { IpnWithdrawBatch } from './IpnWithdrawBatch'
 import { IpnWithdrawExchangeCrypto } from './IpnWithdrawExchangeCrypto'
 import { IpnWithdrawExchangeFiat } from './IpnWithdrawExchangeFiat'
 
+/** @category Ipn */
 export type Ipn =
   | IpnInvoice
   | IpnReplenish

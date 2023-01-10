@@ -1,5 +1,12 @@
-export class ApiError extends Error {
+/**
+ * Response API error
+ *
+ * @category SDK Errors
+ */
+export class XPayApiError extends Error {
+  /** response error body: parsed(if json) or raw */
   readonly body: any
+  /** response status code */
   readonly status: number
 
   constructor(status: number, body: string) {

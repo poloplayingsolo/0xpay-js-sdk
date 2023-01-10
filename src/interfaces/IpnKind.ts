@@ -1,3 +1,4 @@
+/** @category Ipn */
 export enum IpnKind {
   INVOICE = 'Invoice',
   REPLENISH = 'Replenish',

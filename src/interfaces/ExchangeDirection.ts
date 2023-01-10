@@ -1,3 +1,4 @@
+/** @category Exchange */
 export interface ExchangeDirection {
   exchange: {
     ticker: string

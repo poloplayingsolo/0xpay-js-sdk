@@ -1,6 +1,7 @@
 import { IpnKind } from './IpnKind'
 import { IpnStatus } from './IpnStatus'
 
+/** @category Ipn */
 export interface IpnExchange {
   id: string
   kind: IpnKind.EXCHANGE

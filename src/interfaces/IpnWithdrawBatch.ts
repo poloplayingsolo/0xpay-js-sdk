@@ -1,6 +1,7 @@
 import { IpnKind } from './IpnKind'
 import { IpnStatus } from './IpnStatus'
 
+/** @category Ipn */
 export interface IpnWithdrawBatch {
   kind: IpnKind.WITHDRAW_BATCH
   id: string

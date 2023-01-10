@@ -80,7 +80,6 @@ typings/
 
 # Nuxt.js build / generate output
 .nuxt
-lib
 
 # Gatsby files
 .cache/
@@ -102,3 +101,11 @@ lib
 
 # TernJS port file
 .tern-port
+
+.gitignore
+LICENSE
+README.md
+rollup.config.js
+tsconfig.json
+src/
+docs/

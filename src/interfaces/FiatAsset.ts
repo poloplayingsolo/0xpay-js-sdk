@@ -1,3 +1,4 @@
+/** @category Asset */
 export interface FiatAsset {
   name: string
   ticker: string

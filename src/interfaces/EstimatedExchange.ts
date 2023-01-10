@@ -1,3 +1,4 @@
+/** @category Exchange */
 export interface EstimatedExchange {
   spend: {
     ticker: string
