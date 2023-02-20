@@ -1,6 +1,6 @@
 {
   "name": "@0xpay/sdk",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "SDK for 0xPay API",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
