@@ -147,6 +147,30 @@ export class XPay {
   }
 
   /**
+   * Reserve rotating address
+   * 
+   * @param body.blockchain -  Blockchain in which withdraw rotating address will be reserved
+   * @param body.meta - Metadata to catch it back later with a notification
+   * @param body.duration - Reservation time for address (in ms). Default duration equal to 1 day
+   * @param body.durationAfterReplenishment - Reservation time after any replenishment (ex. if replenishment_time = n, then rotating_address.expiredAt = n + durationAfterReplenishment). Default value equal to 2 hours
+   * @param body.target.ticker - The currency to which 0xPay will try to exchange the deposited funds   
+   * @param body.target.address - The address, to which 0xPay will withdraw invoice funds in the currency specified in body.target.ticker 
+   * @param body.target.blockchain - Network in which withdrawal will be made, this field is required if body.target.address is provided
+   * @returns - Reserved address with expiration timestamp and metadata
+   */
+  async createRotatingAddress(body: {
+    blockchain: Blockchain;
+    meta: string;
+    duration?: number;
+    durationAfterReplenishment?: number;
+    target?: 
+    | { ticker: string }
+    | { ticker: string; blockchain: Blockchain; address: string } 
+  }): Promise<{ address: string; meta: string; expiredAt: number }> {
+    return await this.fetchWithAuthentication('/merchants/rotating-addresses', 'POST', body)
+  }
+
+  /**
    * Send cryptocurrency transaction
    *
    * Creates an outgoing cryptocurrency transaction.
