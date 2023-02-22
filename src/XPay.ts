@@ -125,16 +125,49 @@ export class XPay {
    * @param body - Request body
    * @param body.blockchain - Blockchain in which address will be created
    * @param body.meta - Metadata to catch it back later with a notification
-   *
+   * @param body.target.ticker - The currency to which 0xPay will try to exchange all funds deposited to created address
+   * @param body.target.address - The address, to which 0xPay will withdraw deposited funds in the currency specified in body.target.ticker (optional)
+   * @param body.target.blockchain - Network in which withdrawal will be made, this field is required if body.target.address is provided (optional)
+   * 
    * @returns Receive address
    * 
    * @throws {@link XPayApiError} if validation failed or exceed limit(not verified merchant)
    *
    * @category Basic Crypto Operations
    */
-  async createReceiveAddress(body: { blockchain: Blockchain; meta?: string }): Promise<string> {
+  async createReceiveAddress(body: { 
+    blockchain: Blockchain;
+    meta?: string; 
+    target?: 
+      | { ticker: string }
+      | { ticker: string; blockchain: Blockchain; address: string } 
+  }): Promise<string> {
     const { address } = await this.fetchWithAuthentication('/merchants/addresses', 'POST', body)
     return address
+  }
+
+  /**
+   * Reserve rotating address
+   * 
+   * @param body.blockchain -  Blockchain in which withdraw rotating address will be reserved
+   * @param body.meta - Metadata to catch it back later with a notification
+   * @param body.duration - Reservation time for address (in ms). Default duration equal to 1 day
+   * @param body.durationAfterReplenishment - Reservation time after any replenishment (ex. if replenishment_time = n, then rotating_address.expiredAt = n + durationAfterReplenishment). Default value equal to 2 hours
+   * @param body.target.ticker - The currency to which 0xPay will try to exchange the deposited funds   
+   * @param body.target.address - The address, to which 0xPay will withdraw invoice funds in the currency specified in body.target.ticker 
+   * @param body.target.blockchain - Network in which withdrawal will be made, this field is required if body.target.address is provided
+   * @returns - Reserved address with expiration timestamp and metadata
+   */
+  async createRotatingAddress(body: {
+    blockchain: Blockchain;
+    meta: string;
+    duration?: number;
+    durationAfterReplenishment?: number;
+    target?: 
+    | { ticker: string }
+    | { ticker: string; blockchain: Blockchain; address: string } 
+  }): Promise<{ address: string; meta: string; expiredAt: number }> {
+    return await this.fetchWithAuthentication('/merchants/rotating-addresses', 'POST', body)
   }
 
   /**
@@ -351,7 +384,9 @@ export class XPay {
    * @param body.name - Descriptional field, name of your invoice. For example: "Order payment"
    * @param body.amount - Amount of invoice in decimal format with ticker
    * @param body.toPendingImmediate - Jump immediately to pending status, it can be useful if you want to skip fist "user prompt" status.
-   *
+   * @param body.target.ticker - The currency to which 0xPay will try to exchange the received funds
+   * @param body.target.address - The address, to which 0xPay will withdraw invoice funds in the currency specified in body.target.ticker 
+   * @param body.target.blockchain - Network in which withdrawal will be made, this field is required if body.target.address is provided
    * @returns Invoice url
    * 
    * @throws {@link XPayApiError} if validation failed
@@ -364,8 +399,11 @@ export class XPay {
     amount?: { value: string; ticker: string }
     toPendingImmediate?: boolean
     meta?: string
+    target?: 
+    | { ticker: string }
+    | { ticker: string; blockchain: Blockchain; address: string } 
   }): Promise<string> {
-    const response = await this.fetchWithAuthentication('/merchants/invoices', 'POST', body)
+    const response = await this.fetchWithAuthentication('/merchants/invoices/fiat', 'POST', body)
     return response.url
   }
 
@@ -391,7 +429,10 @@ export class XPay {
    * @param body.duration - The lifetime of crypto invoice in ms. Default: 72 hours
    * @param body.clientDuration - The lifetime of crypto invoice in ms on the frontend. Default: duration / 2
    * @param body.toPendingImmediate - Jump immediately to pending status, it can be useful if you want to skip fist "user prompt" status.
-   *
+   * @param body.target.ticker - The currency to which 0xPay will try to exchange the received funds
+   * @param body.target.address - The address, to which 0xPay will withdraw invoice funds in the currency specified in body.target.ticker 
+   * @param body.target.blockchain - Network in which withdrawal will be made, this field is required if body.target.address is provided
+   * 
    * @returns Invoice url
    * 
    * @throws {@link XPayApiError} if validation failed
@@ -406,6 +447,9 @@ export class XPay {
     clientDuration?: number
     toPendingImmediate?: boolean
     meta?: string
+    target?: 
+    | { ticker: string }
+    | { ticker: string; blockchain: Blockchain; address: string } 
   }): Promise<string> {
     const response = await this.fetchWithAuthentication('/merchants/invoices/crypto', 'POST', body)
     return response.url
