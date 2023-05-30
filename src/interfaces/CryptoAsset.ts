@@ -1,10 +1,11 @@
-import { Blockchain } from './Blockchain'
+import { Blockchain } from '../enums'
 
 /** @category Asset */
 export interface CryptoAsset {
   name: string
-  ticker: string
+  decimals: number
   blockchains: Blockchain[]
+  ticker: string
   price: {
     value: string
     ticker: string

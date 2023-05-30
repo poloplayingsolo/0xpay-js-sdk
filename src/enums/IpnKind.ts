@@ -6,5 +6,6 @@ export enum IpnKind {
   EXCHANGE = 'Exchange',
   WITHDRAW_BATCH = 'WithdrawBatch',
   WITHDRAW_EXCHANGE_CRYPTO = 'CryptoExchangeWithdraw',
-  WITHDRAW_EXCHANGE_FIAT = 'FiatExchangeWithdraw'
+  WITHDRAW_EXCHANGE_FIAT = 'FiatExchangeWithdraw',
+  CRYPTO_INVOICE = 'CryptoInvoice'
 }

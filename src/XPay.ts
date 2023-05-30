@@ -2,7 +2,6 @@ import { createHmac } from 'crypto'
 import fetch from 'node-fetch'
 
 import {
-  Blockchain,
   CryptoAsset,
   FiatAsset,
   EstimatedExchange,
@@ -11,16 +10,16 @@ import {
   Balance,
   Ipn,
   IpnReplenish,
-  IpnKind,
   IpnInvoice,
   IpnWithdraw,
   IpnExchange,
   IpnWithdrawBatch,
   IpnWithdrawExchangeCrypto,
   IpnWithdrawExchangeFiat,
-  IpnStatus
+  IpnCryptoInvoice
 } from './interfaces'
 import { XPayApiError } from './XPayApiError'
+import { IpnKind, IpnStatus, Blockchain } from './enums'
 
 /**
  * 0xPay API SDK with methods and utilities
@@ -102,9 +101,9 @@ export class XPay {
    * @param tickers - Tickers of balances to get
    *
    * @returns Balances
-   * 
+   *
    * @throws {@link XPayApiError} if validation failed
-   * 
+   *
    * @category Merchant Info
    */
   getBalances(tickers: string[]): Promise<Balance[]> {
@@ -128,19 +127,17 @@ export class XPay {
    * @param body.target.ticker - The currency to which 0xPay will try to exchange all funds deposited to created address
    * @param body.target.address - The address, to which 0xPay will withdraw deposited funds in the currency specified in body.target.ticker (optional)
    * @param body.target.blockchain - Network in which withdrawal will be made, this field is required if body.target.address is provided (optional)
-   * 
+   *
    * @returns Receive address
-   * 
+   *
    * @throws {@link XPayApiError} if validation failed or exceed limit(not verified merchant)
    *
    * @category Basic Crypto Operations
    */
-  async createReceiveAddress(body: { 
-    blockchain: Blockchain;
-    meta?: string; 
-    target?: 
-      | { ticker: string }
-      | { ticker: string; blockchain: Blockchain; address: string } 
+  async createReceiveAddress(body: {
+    blockchain: Blockchain
+    meta?: string
+    target?: { ticker: string } | { ticker: string; blockchain: Blockchain; address: string }
   }): Promise<string> {
     const { address } = await this.fetchWithAuthentication('/merchants/addresses', 'POST', body)
     return address
@@ -148,24 +145,22 @@ export class XPay {
 
   /**
    * Reserve rotating address
-   * 
+   *
    * @param body.blockchain -  Blockchain in which withdraw rotating address will be reserved
    * @param body.meta - Metadata to catch it back later with a notification
    * @param body.duration - Reservation time for address (in ms). Default duration equal to 1 day
    * @param body.durationAfterReplenishment - Reservation time after any replenishment (ex. if replenishment_time = n, then rotating_address.expiredAt = n + durationAfterReplenishment). Default value equal to 2 hours
-   * @param body.target.ticker - The currency to which 0xPay will try to exchange the deposited funds   
-   * @param body.target.address - The address, to which 0xPay will withdraw invoice funds in the currency specified in body.target.ticker 
+   * @param body.target.ticker - The currency to which 0xPay will try to exchange the deposited funds
+   * @param body.target.address - The address, to which 0xPay will withdraw invoice funds in the currency specified in body.target.ticker
    * @param body.target.blockchain - Network in which withdrawal will be made, this field is required if body.target.address is provided
    * @returns - Reserved address with expiration timestamp and metadata
    */
   async createRotatingAddress(body: {
-    blockchain: Blockchain;
-    meta: string;
-    duration?: number;
-    durationAfterReplenishment?: number;
-    target?: 
-    | { ticker: string }
-    | { ticker: string; blockchain: Blockchain; address: string } 
+    blockchain: Blockchain
+    meta: string
+    duration?: number
+    durationAfterReplenishment?: number
+    target?: { ticker: string } | { ticker: string; blockchain: Blockchain; address: string }
   }): Promise<{ address: string; meta: string; expiredAt: number }> {
     return await this.fetchWithAuthentication('/merchants/rotating-addresses', 'POST', body)
   }
@@ -188,9 +183,9 @@ export class XPay {
    * @param body.meta - Metadata to catch it back later with a notification
    *
    * @returns Withdraw id
-   * 
+   *
    * @throws {@link XPayApiError} if validation failed, not enough balance or not enough fee
-   * 
+   *
    * @category Basic Crypto Operations
    */
   async withdrawCrypto(body: {
@@ -217,9 +212,9 @@ export class XPay {
    * @param address - Destination wallet address(if you fill it in, we'll check if the transaction might be an internal transfer)
    *
    * @returns Withdraw fee
-   * 
+   *
    * @throws {@link XPayApiError} if validation failed
-   * 
+   *
    * @category Basic Crypto Operations
    */
   async getCryptoWithdrawalFee(
@@ -240,10 +235,10 @@ export class XPay {
   /**
    * List all supported crypto assets
    *
-   * This method is used to fetch all available crypto assets of your merchant. 
+   * This method is used to fetch all available crypto assets of your merchant.
    *
    * @returns Array of all crypto assets with their ticker, name, price, and blockchain network
-   * 
+   *
    * @category Basic Crypto Operations
    */
   getAvailableCryptoAssets(): Promise<CryptoAsset[]> {
@@ -268,9 +263,9 @@ export class XPay {
    * @param body.meta - Metadata to catch it back later with a notification
    *
    * @returns Withdraw id
-   * 
+   *
    * @throws {@link XPayApiError} if validation failed or not enough balance
-   * 
+   *
    * @category Basic Fiat Operations
    */
   async withdrawFiat(body: {
@@ -281,11 +276,7 @@ export class XPay {
     meta?: string
     fee?: string
   }): Promise<string> {
-    const response = await this.fetchWithAuthentication(
-      '/merchants/withdrawals/fiat',
-      'POST',
-      body
-    )
+    const response = await this.fetchWithAuthentication('/merchants/withdrawals/fiat', 'POST', body)
     return response.id
   }
 
@@ -301,7 +292,7 @@ export class XPay {
    * Example: You want to send UAH 100,000 to a banking card.
    * Normally, that'd require creating 7 different requests of ~UAH 14,500.
    * With batched payments, your transaction amount will be automatically split into smaller portions:
-   * (13800 + 13611 + 14120 + 13900 + 13831 + 13822 + 8447 + 8469 = 100 000), then sent as a batch of payments. 
+   * (13800 + 13611 + 14120 + 13900 + 13831 + 13822 + 8447 + 8469 = 100 000), then sent as a batch of payments.
    *
    * @param body - Request body
    * @param body.ticker - Currency ticker to withdraw(UAH)
@@ -312,9 +303,9 @@ export class XPay {
    * @param body.meta - Metadata to catch it back later with a notification
    *
    * @returns Withdraw batch id
-   * 
+   *
    * @throws {@link XPayApiError} if validation failed, not enough balance or not enough fee
-   * 
+   *
    * @category Basic Fiat Operations
    */
   async withdrawFiatBatch(body: {
@@ -342,9 +333,9 @@ export class XPay {
    * @param ticker - Currency ticker to withdraw(UAH)
    *
    * @returns Withdraw fee
-   * 
+   *
    * @throws {@link XPayApiError} if validation failed
-   * 
+   *
    * @category Basic Fiat Operations
    */
   async getFiatWithdrawalFee(amount: string, ticker: string): Promise<string> {
@@ -362,7 +353,7 @@ export class XPay {
    * This method is used to fetch all available fiat assets of your merchant.
    *
    * @returns Array of all crypto fiat with their ticker, name and price
-   * 
+   *
    * @category Basic Fiat Operations
    */
   getAvailableFiatAssets(): Promise<FiatAsset[]> {
@@ -374,7 +365,7 @@ export class XPay {
    *
    * Creates a webpage with your fiat invoice details on 0xpay.app domain, usable for a one-time payment.
    * Currently, the only supported fiat ticker is UAH.
-   * 
+   *
    * @remarks
    * Payment limits: Min — 25 UAH, Max — 29999 UAH.
    * Status Updates: After creation, every invoice update will produce an invoice notification.
@@ -385,12 +376,12 @@ export class XPay {
    * @param body.amount - Amount of invoice in decimal format with ticker
    * @param body.toPendingImmediate - Jump immediately to pending status, it can be useful if you want to skip fist "user prompt" status.
    * @param body.target.ticker - The currency to which 0xPay will try to exchange the received funds
-   * @param body.target.address - The address, to which 0xPay will withdraw invoice funds in the currency specified in body.target.ticker 
+   * @param body.target.address - The address, to which 0xPay will withdraw invoice funds in the currency specified in body.target.ticker
    * @param body.target.blockchain - Network in which withdrawal will be made, this field is required if body.target.address is provided
    * @returns Invoice url
-   * 
+   *
    * @throws {@link XPayApiError} if validation failed
-   * 
+   *
    * @category Fiat Invoices
    */
   async createFiatInvoice(body: {
@@ -399,9 +390,7 @@ export class XPay {
     amount?: { value: string; ticker: string }
     toPendingImmediate?: boolean
     meta?: string
-    target?: 
-    | { ticker: string }
-    | { ticker: string; blockchain: Blockchain; address: string } 
+    target?: { ticker: string } | { ticker: string; blockchain: Blockchain; address: string }
   }): Promise<string> {
     const response = await this.fetchWithAuthentication('/merchants/invoices/fiat', 'POST', body)
     return response.url
@@ -411,7 +400,7 @@ export class XPay {
    * Create crypto invoice
    *
    * Creates a webpage with your crypto invoice details on 0xpay.app domain, usable for a one-time payment.
-   * 
+   *
    * @remarks
    * Payment limits: Min — 25 UAH, Max — 29999 UAH.
    * Status Updates: After creation, every invoice update will produce an invoice notification.
@@ -430,13 +419,13 @@ export class XPay {
    * @param body.clientDuration - The lifetime of crypto invoice in ms on the frontend. Default: duration / 2
    * @param body.toPendingImmediate - Jump immediately to pending status, it can be useful if you want to skip fist "user prompt" status.
    * @param body.target.ticker - The currency to which 0xPay will try to exchange the received funds
-   * @param body.target.address - The address, to which 0xPay will withdraw invoice funds in the currency specified in body.target.ticker 
+   * @param body.target.address - The address, to which 0xPay will withdraw invoice funds in the currency specified in body.target.ticker
    * @param body.target.blockchain - Network in which withdrawal will be made, this field is required if body.target.address is provided
-   * 
+   *
    * @returns Invoice url
-   * 
+   *
    * @throws {@link XPayApiError} if validation failed
-   * 
+   *
    * @category Crypto Invoices
    */
   async createCryptoInvoice(body: {
@@ -447,9 +436,7 @@ export class XPay {
     clientDuration?: number
     toPendingImmediate?: boolean
     meta?: string
-    target?: 
-    | { ticker: string }
-    | { ticker: string; blockchain: Blockchain; address: string } 
+    target?: { ticker: string } | { ticker: string; blockchain: Blockchain; address: string }
   }): Promise<string> {
     const response = await this.fetchWithAuthentication('/merchants/invoices/crypto', 'POST', body)
     return response.url
@@ -459,14 +446,14 @@ export class XPay {
    * Get available exchange directions
    *
    * Returned available directions to exchange with price and limits.
-   * 
+   *
    * @remarks
    * 1.Get available directions for exchange through 0xpay (tickers).
    * 2.Get 0xpay exchange limitations (min, max).
    * 3.Find the way how you should format your swaps (precision, step).
    *
    * @returns Exchange directions
-   * 
+   *
    * @category Exchange
    */
   getAvailableExchangeDirections(): Promise<ExchangeDirection[]> {
@@ -477,7 +464,7 @@ export class XPay {
    * Estimate exchange
    *
    * Estimate your exchange for later creation.
-   * 
+   *
    * @param body - Request body
    * @param body.targetTicker - Asset that you want to receive to your balance
    * @param body.spendTicker - Asset that you want to spend from your balance
@@ -486,9 +473,9 @@ export class XPay {
    * @param body.price - Actual price of the pair
    *
    * @returns Estimated exchange
-   * 
+   *
    * @throws {@link XPayApiError} if validation failed or not enough liquidity
-   * 
+   *
    * @category Exchange
    */
   estimateExchange(body: {
@@ -508,7 +495,7 @@ export class XPay {
    *
    * @remark
    * Status Notifications: After the Success response, 0xpay API will produce notifications according to status updates on your exchange.
-   * 
+   *
    * @param body - Request body
    * @param body.targetTicker - Asset that you want to receive to your balance
    * @param body.spendTicker - Asset that you want to spend from your balance
@@ -520,9 +507,9 @@ export class XPay {
    * @param body.localId - If was specified - error will be thrown if not unique
    *
    * @returns Exchange id
-   * 
+   *
    * @throws {@link XPayApiError} if validation failed, not enough liquidity, not enough balance or not enough fee
-   * 
+   *
    * @category Exchange
    */
   async exchange(body: {
@@ -541,7 +528,7 @@ export class XPay {
 
   /**
    * Estimate crypto withdrawal with exchange
-   * 
+   *
    * @param body - Request body
    * @param body.ticker - Ticker for withdrawal. Example: You want to spend (exchange) USDT and make a withdrawal in BTC (ticker value)
    * @param body.blockchain - Blockchain network for withdrawal
@@ -552,9 +539,9 @@ export class XPay {
    * @param body.price - Actual price of the pair
    *
    * @returns Estimated crypto withdraw with exchange
-   * 
+   *
    * @throws {@link XPayApiError} if validation failed, not enough liquidity
-   * 
+   *
    * @category Withdraw With Exchange
    */
   estimateExchangeWithdrawalCrypto(body: {
@@ -575,7 +562,7 @@ export class XPay {
 
   /**
    * Estimate fiat withdrawal with exchange
-   * 
+   *
    * @param body - Request body
    * @param body.ticker - Ticker for withdrawal(only UAH available)
    * @param body.spendTicker - Asset that you want to spend from your balance
@@ -584,9 +571,9 @@ export class XPay {
    * @param body.price - Actual price of the pair
    *
    * @returns Estimated fiat withdraw with exchange
-   * 
+   *
    * @throws {@link XPayApiError} if validation failed, not enough liquidity
-   * 
+   *
    * @category Withdraw With Exchange
    */
   estimateExchangeWithdrawalFiat(body: {
@@ -608,7 +595,7 @@ export class XPay {
    *
    * @remark
    * Status Notifications: After the Success response, 0xpay API will produce notifications according to status updates on your exchange.
-   * 
+   *
    * @param body - Request body
    * @param body.ticker - Ticker for withdrawal. Example: You want to spend (exchange) USDT and make a withdrawal in BTC (ticker value)
    * @param body.blockchain - Blockchain network for withdrawal
@@ -623,9 +610,9 @@ export class XPay {
    * @param body.localId - If was specified - error will be thrown if not unique
    *
    * @returns Crypto withdrawal with exchange id
-   * 
+   *
    * @throws {@link XPayApiError} if validation failed, not enough liquidity, not enough balance or not enough fee
-   * 
+   *
    * @category Withdraw With Exchange
    */
   async withdrawExchangeCrypto(body: {
@@ -641,7 +628,11 @@ export class XPay {
     meta: string
     price: string
   }): Promise<string> {
-    const { id } = await this.fetchWithAuthentication('/merchants/exchange/withdrawals/crypto', 'POST', body)
+    const { id } = await this.fetchWithAuthentication(
+      '/merchants/exchange/withdrawals/crypto',
+      'POST',
+      body
+    )
     return id
   }
 
@@ -650,7 +641,7 @@ export class XPay {
    *
    * @remark
    * Status Notifications: After the Success response, 0xpay API will produce notifications according to status updates on your exchange.
-   * 
+   *
    * @param body - Request body
    * @param body.ticker - Ticker for withdrawal(only UAh available)
    * @param body.spendTicker - Asset that you want to spend from your balance
@@ -664,9 +655,9 @@ export class XPay {
    * @param body.localId - If was specified - error will be thrown if not unique
    *
    * @returns Crypto withdrawal with exchange id
-   * 
+   *
    * @throws {@link XPayApiError} if validation failed, not enough liquidity, not enough balance, not enough fee
-   * 
+   *
    * @category Withdraw With Exchange
    */
   async withdrawExchangeFiat(body: {
@@ -681,13 +672,17 @@ export class XPay {
     localId: string
     price: string
   }): Promise<string> {
-    const { id } = await this.fetchWithAuthentication('/merchants/exchange/withdrawals/fiat', 'POST', body)
+    const { id } = await this.fetchWithAuthentication(
+      '/merchants/exchange/withdrawals/fiat',
+      'POST',
+      body
+    )
     return id
   }
 
   /**
    * Validate Webhook Requests
-   * 
+   *
    * @param payload - Request required payload
    * @param payload.method - Request method
    * @param payload.url - Request url
@@ -695,12 +690,16 @@ export class XPay {
    * @param payload.signature - Request `signature` header
    *
    * @returns Code and description of validation error if failed
-   * 
+   *
    * @category Utilities
    */
-  validateWebhookRequest(
-    payload: { method: string; url: string; rawBody: string; timestamp: number | string; signature: string },
-  ): { code: -1 | -2 | -3; description: string } | void {
+  validateWebhookRequest(payload: {
+    method: string
+    url: string
+    rawBody: string
+    timestamp: number | string
+    signature: string
+  }): { code: -1 | -2 | -3; description: string } | void {
     const { method, url, rawBody, signature } = payload
     const timestamp = Number(payload.timestamp)
 
@@ -722,6 +721,11 @@ export class XPay {
   /** @category Utilities */
   isIpnInvoice(ipn: Ipn): ipn is IpnInvoice {
     return ipn.kind === IpnKind.INVOICE
+  }
+
+  /** @category Utilities */
+  isIpnCryptoInvoice(ipn: Ipn): ipn is IpnCryptoInvoice {
+    return ipn.kind === IpnKind.CRYPTO_INVOICE
   }
 
   /** @category Utilities */

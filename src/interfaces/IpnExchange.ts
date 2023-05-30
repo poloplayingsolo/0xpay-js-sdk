@@ -1,21 +1,22 @@
-import { IpnKind } from './IpnKind'
-import { IpnStatus } from './IpnStatus'
+import { IpnKind, IpnStatus } from '../enums'
 
 /** @category Ipn */
 export interface IpnExchange {
-  id: string
   kind: IpnKind.EXCHANGE
+  id: string
+  meta?: string
+  localId?: string
+  status: IpnStatus
+  time: number
+  fee: string
   targetTicker: string
   targetAmount: string
-  fee: string
   spendTicker: string
   spendAmount: string
   price: string
   pricePair: string[]
-  meta?: string
-  localId: string
-  status: IpnStatus
   merchantId: string
   failedReason?: string
-  time: number
 }
+
+

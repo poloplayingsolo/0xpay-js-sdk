@@ -1,31 +1,26 @@
-import { Blockchain } from './Blockchain'
-import { IpnKind } from './IpnKind'
-import { IpnStatus } from './IpnStatus'
+import { IpnKind, IpnStatus, Blockchain } from '../enums'
 
 /** @category Ipn */
 export interface IpnWithdrawExchangeCrypto {
-  id: string
   kind: IpnKind.WITHDRAW_EXCHANGE_CRYPTO
+  id: string
   ticker: string
   amount: string
-  amountRaw: string
   fee: string
-  feeRaw: string
+  meta?: string
+  localId?: string
+  status: IpnStatus
+  time: number
   exchangeFee: string
-  exchangeFeeRaw: string
   spendTicker: string
+  exchanged: boolean
   spendAmount: string
   price: string
   pricePair: string[]
   blockchain: Blockchain
   hash?: string
+  internal?: boolean
   address: string
-  meta?: string
-  localId: string
-  internal: boolean
-  status: IpnStatus
   merchantId: string
   failedReason?: string
-  time: number
-  exchanged: boolean
 }

@@ -1,28 +1,26 @@
-import { IpnKind } from './IpnKind'
-import { IpnStatus } from './IpnStatus'
-
+import { IpnKind, IpnStatus } from '../enums'
 /** @category Ipn */
 export interface IpnWithdrawExchangeFiat {
-  id: string
   kind: IpnKind.WITHDRAW_EXCHANGE_FIAT
+  id: string
   ticker: string
   amount: string
+  paidAmount?: string
+  failedAmount?: string
+  paidFee?: string
+  failedFee?: string
   fee: string
+  meta?: string
+  localId?: string
+  status: IpnStatus
+  time: number
   exchangeFee: string
   spendTicker: string
   spendAmount: string
   price: string
   pricePair: string[]
-  to: string
-  failedReason?: string
-  meta?: string
-  localId: string
-  internal?: boolean
-  status: IpnStatus
-  merchantId: string
-  time: number
-  paidAmount: string
-  failedAmount?: string
-  failedFee?: string
   exchanged: boolean
+  to: string
+  merchantId: string
+  failedReason?: string
 }

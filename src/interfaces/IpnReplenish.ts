@@ -1,6 +1,4 @@
-import { Blockchain } from './Blockchain'
-import { IpnKind } from './IpnKind'
-import { IpnStatus } from './IpnStatus'
+import { IpnKind, IpnStatus, Blockchain } from '../enums'
 
 /** @category Ipn */
 export interface IpnReplenish {
@@ -12,16 +10,12 @@ export interface IpnReplenish {
   blockchain: Blockchain
   kind: IpnKind.REPLENISH
   from: string[]
-  localId?: string
   to: string
   amount: string
-  amountRaw: string
-  fee?: string
-  meta?: string
-  equivalent: {
-    value: string
-    price: string
-    ticker: string
-  }
+  fee: string
+  time: number
+  meta: string
   status: IpnStatus
+  merchantId: string
+  withdrawId?: string
 }
